@@ -1,0 +1,36 @@
+# Configure the AWS Provider
+provider "aws" {
+  version = "~> 2.8"
+  access_key = "AKIAILEIFXB6GEMGZJ7Q"
+  secret_key = "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"
+  region = "us-east-1" 
+}
+-------------------------------------------------------------
+resource "aws_instance" "terraform" {
+  ami           = "ami-0c0ec4f9dfef65946"
+  key_name      = "terraform-key"
+  instance_type = "t2.micro"
+  tags = {
+    Name = "terraform-instance"
+  }
+------------------------------------------------------------------------------
+  connection {
+    type        = "ssh"
+    user        = "ec2-user"
+    private_key = file("/home/mayank/Downloads/terraform-key.pem")
+    host        = self.public_ip
+  }
+------------------------------------------------------------------------------
+  provisioner "remote-exec" {
+    inline = [
+      "sudo amazon-linux-extras enable nginx1.12",
+      "sudo yum -y install nginx",
+    ]
+  }
+
+}
+ 
+
+provisioner "local-exec" {
+    command = "echo ${aws_instance.terraform.public_ip} > ip_address.txt"
+  }
